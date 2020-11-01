@@ -1,3 +1,5 @@
+![Tests](https://github.com/tiboun/varsubst/workflows/tests/badge.svg)
+
 Varsubst is a rewrite of [envsubst](https://github.com/ashafer01/python-envsubst).
 
 Varsubst render templates from a string with a given resolver.
