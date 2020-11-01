@@ -1,0 +1,15 @@
+[paths]
+source =
+   src
+   */site-packages
+
+[run]
+branch = false
+parallel = false
+source =
+    varsubst
+    tests
+
+[report]
+show_missing = true
+precision = 2
