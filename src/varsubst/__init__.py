@@ -22,12 +22,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from varsubst.interpolator import BaseInterpolator, ShellInterpolator
+from varsubst.interpolators import BaseInterpolator, ShellInterpolator
 from varsubst.resolvers import BaseResolver, EnvResolver
 
 
 def varsubst(template: str, *,
-             interpolator: BaseInterpolator = ShellInterpolator(),
-             resolver: BaseResolver = EnvResolver(),
-             fail_on_unresolved: bool = True) -> str:
-    return interpolator.render(template, resolver, fail_on_unresolved)
+             interpolator: BaseInterpolator =
+             ShellInterpolator(fail_on_unresolved=True),
+             resolver: BaseResolver = EnvResolver()) -> str:
+    return interpolator.render(template, resolver)

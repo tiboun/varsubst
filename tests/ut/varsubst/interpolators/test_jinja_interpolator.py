@@ -22,27 +22,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from varsubst.resolvers import DictResolver
+from typing import Dict, Optional
+
+from varsubst.interpolators import JinjaInterpolator
+from varsubst.resolvers import BaseResolver
+
+resolved_suffix = '_resolved'
+unresolved_suffix = '_unresolved'
+empty_suffix = '_empty'
 
 
-def test_env_set():
-    expected = 'bar'
-    actual = DictResolver({'FOO': expected}).resolve('FOO')
-    assert actual == expected
+class DummyResolver(BaseResolver):
+    _dict = {'firstname': 'foo', 'lastname': 'bar'}
+
+    def values(self) -> Dict[str, str]:
+        return self._dict.copy()
+
+    def resolve(self, key: str) -> Optional[str]:
+        if key.endswith(unresolved_suffix):
+            return None
+        elif key.endswith(empty_suffix):
+            return ''
+        else:
+            return key + resolved_suffix
 
 
-def test_env_empty():
-    expected = ''
-    actual = DictResolver({'FOO': expected}).resolve('FOO')
-    assert actual == expected
-
-
-def test_env_unset():
-    actual = DictResolver({}).resolve('FOO')
-    assert actual is None
-
-
-def test_values():
-    expected = {'Foo': 'bar'}
-    actual = DictResolver(expected).values()
+def test_simple_template():
+    template = "Hello {{ firstname | capitalize }} {{ lastname | upper }}"
+    jinja_interpolator = JinjaInterpolator()
+    actual = jinja_interpolator.render(template, resolver=DummyResolver())
+    expected = "Hello Foo BAR"
     assert actual == expected

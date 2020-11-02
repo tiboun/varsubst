@@ -48,3 +48,8 @@ def test_env_unset():
         pass
     actual = EnvResolver().resolve('FOO')
     assert actual is None
+
+
+def test_values():
+    actual = EnvResolver().values()
+    assert len(actual) > 0

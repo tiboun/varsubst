@@ -22,13 +22,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
 from typing import Optional
 
-import pytest
-
 from varsubst import varsubst
-from varsubst.exceptions import KeyUnresolvedException
 from varsubst.resolvers import BaseResolver
 
 resolved_suffix = '_resolved'
@@ -51,130 +47,4 @@ def test_simple():
     expected = test_fmt.format('FOO' + resolved_suffix)
     test_str = test_fmt.format('$FOO')
     actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_bracketed_simple():
-    test_fmt = 'foo {0} bar'
-    expected = test_fmt.format('FOO' + resolved_suffix)
-    test_str = test_fmt.format('${FOO}')
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_unset_default():
-    test_fmt = 'abc {0} def'
-    default_str = 'i am a default'
-    test_var = '${FOO' + unresolved_suffix + '-' + default_str + '}'
-    test_str = test_fmt.format(test_var)
-    expected = test_fmt.format(default_str)
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_unset_only_no_default():
-    test_val = ''
-    test_fmt = 'abc {0} def'
-    default_str = 'i am a default'
-    test_var = '${FOO' + empty_suffix + '-' + default_str + '}'
-    test_str = test_fmt.format(test_var)
-    expected = test_fmt.format(test_val)
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_no_default_with_unset_only_operator():
-    test_fmt = 'abc {0} def'
-    test_var = '${FOO-i am a default}'
-    test_str = test_fmt.format(test_var)
-    expected = test_fmt.format('FOO' + resolved_suffix)
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_empty_unset_or_empty_default():
-    test_fmt = 'abc {0} def'
-    default_str = 'i am a default'
-    test_var = '${FOO' + empty_suffix + ':-' + default_str + '}'
-    test_str = test_fmt.format(test_var)
-    expected = test_fmt.format(default_str)
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_unset_unset_or_empty_default():
-    test_fmt = 'abc {0} def'
-    default_str = 'i am a default'
-    test_var = '${FOO' + unresolved_suffix + ':-' + default_str + '}'
-    test_str = test_fmt.format(test_var)
-    expected = test_fmt.format(default_str)
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_no_default_with_emtpy_operator():
-    test_fmt = 'abc {0} def'
-    test_var = '${FOO:-i am a default}'
-    test_str = test_fmt.format(test_var)
-    expected = test_fmt.format('FOO' + resolved_suffix)
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_multiple():
-    try:
-        del os.environ['NOPE']
-    except KeyError:
-        pass
-
-    nope_default = 'var NOPE not there'
-
-    test_fmt = 'abc {0} def {1}{2} jkl {3} mno'
-    test_str = test_fmt.format(
-        '$FOO',
-        '${BAR}',
-        '${BAR2:-default for bar2}',
-        '${NOPE' + unresolved_suffix + '-' + nope_default + '}',
-    )
-    expected = test_fmt.format(
-        'FOO' + resolved_suffix,
-        'BAR' + resolved_suffix,
-        'BAR2' + resolved_suffix,
-        nope_default
-    )
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_escaped():
-    tests = [
-        r'i am an \$ESCAPED variable',
-        r'i am an \${ESCAPED:-bracketed} \${expression}',
-    ]
-    for test in tests:
-        assert test == varsubst(test, resolver=DummyResolver())
-
-
-def test_simple_var_default():
-    test_fmt = 'abc {0} def'
-    test_str = test_fmt.format('${TEST' + empty_suffix + ':-$DEFAULT}')
-    expected = test_fmt.format('DEFAULT' + resolved_suffix)
-    actual = varsubst(test_str, resolver=DummyResolver())
-    assert actual == expected
-
-
-def test_unresolved_key_exception():
-    test_fmt = 'abc {0} def'
-    test_str = test_fmt.format('$FOO' + unresolved_suffix)
-    with pytest.raises(KeyUnresolvedException):
-        varsubst(test_str, resolver=DummyResolver())
-
-
-def test_unresolved_key_fallback():
-    test_fmt = 'abc {0} def'
-    test_str = test_fmt.format('$FOO' + unresolved_suffix)
-    expected = test_fmt.format('')
-    actual = varsubst(test_str,
-                      resolver=DummyResolver(),
-                      fail_on_unresolved=False)
     assert actual == expected
