@@ -26,6 +26,7 @@ Varsubst support shell-like variables which are defined as follows:
 ```python
 from varsubst import varsubst
 from varsubst.resolvers import DictResolver
+from varsubst.interpolators import JinjaInterpolator
 
 print(varsubst('$USER')) # result : 'tiboun'
 
@@ -36,4 +37,11 @@ print(varsubst('$UNDEFINED', fail_on_unresolved=False)) # result : ''
 print(varsubst('$UNDEFINED', fail_on_unresolved=False)) # result : ''
 
 print(varsubst('$USER', resolver=DictResolver({'USER': 'tiboun'})))
+
+print(varsubst('{{ USER }}', interpolator=JinjaInterpolator()))
 ```
+
+# Extras
+
+You may install **varsubst[jinja2]** as well if you intend to interpolate template with Jinja.
+If you plan to use jinja2 only, you may install it yourself in your project instead of using this one.

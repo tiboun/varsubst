@@ -37,8 +37,7 @@ class BaseInterpolator:
     provided by a resolver.
     """
 
-    def render(self, template: str, resolver: BaseResolver,
-               fail_on_unresolved: bool) -> str:
+    def render(self, template: str, resolver: BaseResolver) -> str:
         """
         :param template: String with shell-like variables.
             Allowed variables are of the form:
@@ -68,26 +67,28 @@ class ShellInterpolator(BaseInterpolator):
     _extended_re: Pattern[AnyStr] = re.compile(
         r'(?<!\\)\$\{([A-Za-z0-9_]+)((:?-)([^}]+))?\}')
 
-    def _repl_simple_env_var(self, resolver: BaseResolver,
-                             fail_on_unresolved: bool) -> str:
+    def __init__(self, fail_on_unresolved: bool) -> None:
+        """
+        :param fail_on_unresolved: if true, will throw an exception.
+        """
+        self.fail_on_unresolved = fail_on_unresolved
+
+    def _repl_simple_env_var(self, resolver: BaseResolver) -> str:
         """
         :param resolver: an instance which return a value given a key
-        :param fail_on_unresolved: if true, will throw an exception.
         """
         def substitute(m):
             var_name = m.group(1)
             result = resolver.resolve(var_name)
-            if result is None and fail_on_unresolved:
+            if result is None and self.fail_on_unresolved:
                 raise KeyUnresolvedException(var_name)
             return result or ''
 
         return substitute
 
-    def _repl_extended_env_var(self, resolver: BaseResolver,
-                               fail_on_unresolved: bool) -> str:
+    def _repl_extended_env_var(self, resolver: BaseResolver) -> str:
         """
         :param resolver: an instance which return a value given a key
-        :param fail_on_unresolved: if true, will throw an exception.
         """
         def substitute(m):
             var_name = m.group(1)
@@ -99,27 +100,24 @@ class ShellInterpolator(BaseInterpolator):
                     # use default if var is unset or empty
                     if not result:
                         result = ShellInterpolator._simple_re.sub(
-                            self._repl_simple_env_var(resolver,
-                                                      fail_on_unresolved),
+                            self._repl_simple_env_var(resolver),
                             default_raw)
                 elif m.group(3) == '-':
                     # use default if var is unset
                     if result is None:
                         result = ShellInterpolator._simple_re.sub(
-                            self._repl_simple_env_var(resolver,
-                                                      fail_on_unresolved),
+                            self._repl_simple_env_var(resolver),
                             default_raw)
                 else:
                     raise RuntimeError('Unexpected string matched regex')
             else:
-                if result is None and fail_on_unresolved:
+                if result is None and self.fail_on_unresolved:
                     raise KeyUnresolvedException(var_name)
             return result or ''
 
         return substitute
 
-    def render(self, template: str, resolver: BaseResolver,
-               fail_on_unresolved: bool) -> str:
+    def render(self, template: str, resolver: BaseResolver) -> str:
         """
         Substitute shell like variables in the given template
         The following forms are supported:
@@ -137,10 +135,21 @@ class ShellInterpolator(BaseInterpolator):
         """
         # handle simple un-bracketed env vars like $FOO
         first_pass = ShellInterpolator._simple_re.sub(
-            self._repl_simple_env_var(resolver, fail_on_unresolved),
+            self._repl_simple_env_var(resolver),
             template)
 
         # handle bracketed env vars with optional default specification
         return ShellInterpolator._extended_re.sub(
-            self._repl_extended_env_var(resolver, fail_on_unresolved),
+            self._repl_extended_env_var(resolver),
             first_pass)
+
+
+class JinjaInterpolator(BaseInterpolator):
+
+    def render(self, template: str, resolver: BaseResolver) -> str:
+        """
+        Substitute template using jinja.
+        """
+        from jinja2 import Template
+        jtemplate = Template(template)
+        return jtemplate.render(**resolver.values())

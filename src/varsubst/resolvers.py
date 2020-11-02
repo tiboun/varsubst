@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 from os import environ
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 
 class BaseResolver:
@@ -33,11 +33,18 @@ class BaseResolver:
     A resolver is intented to provide values from keys.
     """
 
-    def resolve(self, key: str) -> Optional[str]:
+    def resolve(self, key: str) -> Optional[Any]:
         """
         Resolver should be able to produce a value for a given key.
         If key doesn't exist, should return None.
         """
+        pass
+
+    def values(self) -> Dict[str, Any]:
+        """
+        Return all values available in the resolver.
+        """
+        pass
 
 
 class EnvResolver(BaseResolver):
@@ -45,12 +52,15 @@ class EnvResolver(BaseResolver):
     EnvResolver provide a value based on environnement variables.
     """
 
-    def resolve(self, key: str) -> Optional[str]:
+    def resolve(self, key: str) -> Optional[Any]:
         """
         Resolver should be able to produce a value for a given key.
         If key doesn't exist, should return None.
         """
         return environ.get(key)
+
+    def values(self) -> Dict[str, Any]:
+        return environ.copy()
 
 
 class DictResolver(BaseResolver):
@@ -58,15 +68,21 @@ class DictResolver(BaseResolver):
     DictResolver provide a value based on a given dictionary.
     """
 
-    def __init__(self, dict: Dict[str, str]) -> None:
+    def __init__(self, dict: Dict[str, Any]) -> None:
         """
         :param dict: dictionary used to resolve given keys
         """
         self.dict = dict
 
-    def resolve(self, key: str) -> Optional[str]:
+    def resolve(self, key: str) -> Optional[Any]:
         """
         Resolver should be able to produce a value for a given key.
         If key doesn't exist, should return None.
         """
         return self.dict.get(key)
+
+    def values(self) -> Dict[str, Any]:
+        """
+        Return all values available in the resolver.
+        """
+        return self.dict.copy()

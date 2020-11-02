@@ -9,7 +9,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
     setup(
         name='varsubst',
-        version='0.1.1',
+        version='1.0.0',
         url='https://github.com/tiboun/varsubst',
         author='Bounkong Khamphousone',
         author_email='bounkong@gmail.com',
@@ -22,5 +22,8 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
                      " Act as a render template."),
         license="MIT",
         long_description=long_description,
-        long_description_content_type='text/markdown'
+        long_description_content_type='text/markdown',
+        extras_require={
+            'jinja2':  ["jinja2"]
+        }
     )
