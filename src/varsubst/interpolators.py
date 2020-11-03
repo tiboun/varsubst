@@ -145,11 +145,14 @@ class ShellInterpolator(BaseInterpolator):
 
 
 class JinjaInterpolator(BaseInterpolator):
+    from jinja2 import Environment
+
+    def __init__(self, environment: Environment = Environment()) -> None:
+        self.environment = environment
 
     def render(self, template: str, resolver: BaseResolver) -> str:
         """
         Substitute template using jinja.
         """
-        from jinja2 import Template
-        jtemplate = Template(template)
+        jtemplate = self.environment.from_string(template)
         return jtemplate.render(**resolver.values())

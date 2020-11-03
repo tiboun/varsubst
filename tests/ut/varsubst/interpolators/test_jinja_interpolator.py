@@ -24,6 +24,8 @@
 
 from typing import Dict, Optional
 
+from jinja2.environment import Environment
+
 from varsubst.interpolators import JinjaInterpolator
 from varsubst.resolvers import BaseResolver
 
@@ -50,6 +52,16 @@ class DummyResolver(BaseResolver):
 def test_simple_template():
     template = "Hello {{ firstname | capitalize }} {{ lastname | upper }}"
     jinja_interpolator = JinjaInterpolator()
+    actual = jinja_interpolator.render(template, resolver=DummyResolver())
+    expected = "Hello Foo BAR"
+    assert actual == expected
+
+
+def test_overrided_environment():
+    template = "Hello #~ firstname | capitalize ~# #~ lastname | upper ~#"
+    environment = Environment(variable_start_string="#~",
+                              variable_end_string="~#")
+    jinja_interpolator = JinjaInterpolator(environment)
     actual = jinja_interpolator.render(template, resolver=DummyResolver())
     expected = "Hello Foo BAR"
     assert actual == expected
