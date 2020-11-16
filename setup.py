@@ -9,7 +9,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
     setup(
         name='varsubst',
-        version='1.1.0',
+        version='2.0.0',
         url='https://github.com/tiboun/varsubst',
         author='Bounkong Khamphousone',
         author_email='bounkong@gmail.com',

@@ -26,7 +26,7 @@ Varsubst support shell-like variables which are defined as follows:
 ```python
 from varsubst import varsubst
 from varsubst.resolvers import DictResolver
-from varsubst.interpolators import JinjaInterpolator
+from varsubst.interpolators.jinja_interpolator import JinjaInterpolator
 
 print(varsubst('$USER')) # result : 'tiboun'
 

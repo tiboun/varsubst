@@ -26,7 +26,7 @@ from typing import Dict, Optional
 
 from jinja2.environment import Environment
 
-from varsubst.interpolators import JinjaInterpolator
+from varsubst.interpolators.jinja_interpolator import JinjaInterpolator
 from varsubst.resolvers import BaseResolver
 
 resolved_suffix = '_resolved'

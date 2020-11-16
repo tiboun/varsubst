@@ -26,29 +26,8 @@ import re
 from typing import AnyStr, Pattern
 
 from varsubst.exceptions import KeyUnresolvedException
+from varsubst.interpolators.base_interpolator import BaseInterpolator
 from varsubst.resolvers import BaseResolver
-
-
-class BaseInterpolator:
-    """
-    Abstract base class for all interpolators. Don't instantiate it.
-
-    An interpolator is intented to render a template with values
-    provided by a resolver.
-    """
-
-    def render(self, template: str, resolver: BaseResolver) -> str:
-        """
-        :param template: String with shell-like variables.
-            Allowed variables are of the form:
-                - $MY_SIMPLE_VAR
-                - ${MY_SIMPLE_VAR}
-                - ${USER-default}
-                - ${USER-$DEFAULT_USER}
-                - ${USER:-default}
-                - ${USER-$DEFAULT_USER}
-        """
-        pass
 
 
 class ShellInterpolator(BaseInterpolator):
@@ -142,17 +121,3 @@ class ShellInterpolator(BaseInterpolator):
         return ShellInterpolator._extended_re.sub(
             self._repl_extended_env_var(resolver),
             first_pass)
-
-
-class JinjaInterpolator(BaseInterpolator):
-    from jinja2 import Environment
-
-    def __init__(self, environment: Environment = Environment()) -> None:
-        self.environment = environment
-
-    def render(self, template: str, resolver: BaseResolver) -> str:
-        """
-        Substitute template using jinja.
-        """
-        jtemplate = self.environment.from_string(template)
-        return jtemplate.render(**resolver.values())
